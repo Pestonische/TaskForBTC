@@ -1,0 +1,120 @@
+﻿@model TaskForBTC.Services.Models.EventModel
+@{
+    Layout = null;
+}
+<link rel="stylesheet" href="~/css/popup.css" />
+
+
+<div class="cont" >
+    
+    @using (Html.BeginForm("OpenEvent", "Events", FormMethod.Post))
+    {
+        @Html.HiddenFor(model => model.EventId)
+        <div class="text">
+            @Html.DisplayFor(model => model.EventName)
+        </div>
+        
+        <div class="form-group" style="font-size:12px">
+            @Html.LabelFor(model => model.EventDate)
+            @Html.DisplayFor(model => model.EventDate)
+        </div>
+        <div class="form-group" style="font-size:12px">
+            @Html.LabelFor(model => model.NumberOfUsers)
+            @Html.DisplayFor(model => model.NumberOfUsers)
+            @Html.LabelFor(model => model.MaxNumberOfUsers)
+            @Html.DisplayFor(model => model.MaxNumberOfUsers)
+        </div>
+        <table data-paging="false" style="font-size:12px; line-height:0" data-searching="false" data-ordering="false" id="fields" class="table  table-hover">
+            
+        </table>
+        <div class="text">
+            Участники
+        </div>
+        <table data-paging="false" style="font-size:12px; line-height:0" data-searching="false" data-ordering="false" id="users" class="table table-hover">
+            <thead>
+                <tr >
+                    <th>Псевдоним</th>
+                    <th>Имя</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="form-group">
+            <input type="button" class="btn btn-success" value="Присоединиться" onclick="Join(@Model.EventId)" />
+        </div>
+    }
+        
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css">
+<script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+<script>
+    function Join(id) {
+        
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Join", "Events")?id=' + id,
+            success: function (data) {                
+                alert(data.message) 
+                Popup.dialog('close');
+            }
+        });
+    }
+        $(document).ready(function () {
+
+            $("#users").DataTable({
+                "info": false,
+                scrollY: '80px',
+                
+                "ajax": {
+                    "url": "/Events/GetUsers?id=" + @Model.EventId,
+                    "type": "GET",
+                    "datatype": "json"
+                },
+
+                "columns": [
+                    {
+                        "data": "userName"
+                    },
+                    {
+                        "data": "personalName"
+                    }                  
+                ]
+            });
+
+        });
+    $(document).ready(function () {
+
+        $("#fields").DataTable({
+            "info": false,
+            scrollY: '80px',
+
+            "ajax": {
+                "url": "/Events/GetFields?id=" + @Model.EventId,
+                "type": "GET",
+                "datatype": "json"
+            },
+
+            "columns": [
+                {
+                 "data": "lable"
+                    
+                },
+                { "data": "name" }
+
+            ]
+        });
+
+    });
+</script>
+
+    
+
+    
+    

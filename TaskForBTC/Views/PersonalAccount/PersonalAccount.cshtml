@@ -1,0 +1,55 @@
+﻿@model TaskForBTC.Services.Models.PersonalAccountModel
+<h2>Личный кабинет</h2>
+<form method="post" asp-controller="PersonalAccount" asp-action="PersonalAccount">
+    <div asp-validation-summary="ModelOnly"></div>
+    <div>
+        <label asp-for=@Model.PersonalName></label><br />
+        <input asp-for=@Model.PersonalName />
+        <span asp-validation-for=@Model.PersonalName></span>
+    </div>
+    <div>
+        <label asp-for=@Model.Email></label><br />
+        <input asp-for=@Model.Email />
+        <span asp-validation-for=@Model.Email></span>
+    </div>
+    <div>
+        <label asp-for=@Model.Description></label><br />
+        <textarea asp-for=@Model.Description ></textarea>
+        <span asp-validation-for=@Model.Description></span>
+    </div>
+    <div>
+        <label asp-for=@Model.NewPassword></label><br />
+        <input id="newPasword" asp-for=@Model.NewPassword />
+        <span asp-validation-for=@Model.NewPassword></span>
+    </div>
+    <div>
+        <label asp-for=@Model.CurrentPassword></label><br />
+        <input id="currentPasword" asp-for=@Model.CurrentPassword />
+        <span asp-validation-for=@Model.CurrentPassword></span>
+        <input type="button" class="btn btn-success" value="Изменить пароль"
+               onclick="ChangePassword(document.getElementById('newPasword').value, document.getElementById('currentPasword').value )" />
+    </div>
+    <div>
+        <input type="submit" value="Изменить" />
+    </div>
+</form>
+<script>
+    
+    function ChangePassword(newPassword, currentPasword) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ChangePassword", "PersonalAccount")?newPassword=' + newPassword + '&currentPasword=' + currentPasword,
+            success: function (data) {
+                if (!data.success) {
+                    alert(data.message)
+                }
+                else {
+                    alert(data.message)
+                }
+
+            }
+        });
+    }
+
+</script>

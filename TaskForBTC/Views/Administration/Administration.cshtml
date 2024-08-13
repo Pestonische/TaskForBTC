@@ -1,0 +1,137 @@
+﻿<div class="form-horizontal">
+    <a href="#" class="btn btn-success" style="margin-bottom:10px" onclick="EditPage('@Url.Action("CreateEvent","Administration")')">
+        <i class="fa fa-plus" aria-hidden="true"></i> Добавить событие
+    </a>
+    <table data-paging="false" data-searching="false" data-ordering="false" id="events" class="table table-bordered  table-hover">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Дата</th>
+                <th>Участников</th>
+                <th>Макc. участников</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+@section scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+   
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css">
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#events").DataTable({
+                "info": false,
+                scrollY: '400px',
+                "ajax": {
+                    "url": "/Administration/GetEvents",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+
+                "columns": [
+                    { "data": "eventName" },
+                    { "data": "eventDate" },
+                    { "data": "numberOfUsers" },
+                    { "data": "maxNumberOfUsers" },
+                    {
+                        "data": "eventId", "render": function (data, type, full, meta) {
+                            return "<button type='button' class='btn btn-primary btn-sm' style='margin-left:5px' onclick=\"EditPage('@Url.Action("EditEvent", "Administration")?id=' +" + data + ")\"><i class='fa fa-trash'></i> Редактировать</button>";
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "150px"
+                    },
+                    {
+                        "data": "eventId", "render": function (data, type, full, meta) {
+                            return "<button type='button' class='btn btn-primary btn-sm' style='margin-left:5px' onclick=\"DeleteEvent(" + data + ")\"><i class='fa fa-trash'></i> Удалить</button>";
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "150px"
+                    }
+
+                ]
+            });
+
+        });
+
+        function DeleteEvent(eventId) {
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteEvent", "Administration")?eventId=' + eventId,
+                success: function (data) {
+                    if (!data.success) {
+                        alert(data.message)
+                    }
+
+                    else { $('#events').DataTable().ajax.reload() }
+
+                }
+            });
+        }
+
+        var Popup
+
+        function EditPage(url) {
+            var formDiv = $(document.createElement('div'));
+            $.get(url)
+                .done(function (response) {
+                    if (response == null) {
+                        alert("Ничего не выбрано!");
+                    }
+                    else {
+                        formDiv.css("background", "linear-gradient(115deg, #56d8e4 10%, #9f01ea 90%)").html(response);
+                        Popup = formDiv.dialog({
+                            autoOpen: true,
+                            resizable: false,
+                            height: 640,
+                            width: 525,
+                            classes: {
+                                "ui-dialog-titlebar": "white"
+                            },
+                            close: function () {
+                                Popup.dialog('destroy').remove();
+                            }
+
+                        });
+                    }
+                });
+        }
+
+        function SubmitForm(form) {
+
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (!data.success) 
+                        {
+                            alert(data.message)
+                        }
+                        Popup.dialog('close');
+                        $('#events').DataTable().ajax.reload()
+                    }
+                    
+                });
+            }
+            return false;
+        }
+
+    </script>
+}

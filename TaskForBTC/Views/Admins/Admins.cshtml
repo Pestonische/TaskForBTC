@@ -1,0 +1,133 @@
+﻿<div class="form-horizontal">
+    <div class="text">
+        Пользователи
+    </div>
+    <table data-paging="false" data-searching="false" data-ordering="false" id="users" class="table table-bordered  table-hover">
+        <thead>
+            <tr>
+                <th>Псевдоним</th>
+                <th>Имя</th>
+                <th>Почта</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="text">
+        Администраторы
+    </div>
+    <table data-paging="false" data-searching="false" data-ordering="false" id="admins" class="table table-bordered  table-hover">
+        <thead>
+            <tr>
+                <th>Псевдоним</th>
+                <th>Имя</th>
+                <th>Почта</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+@section scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css">
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#admins").DataTable({
+                "info": false,
+                scrollY: '200px',
+                "ajax": {
+                    "url": "/Admins/GetAdmins",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+
+                "columns": [
+                    { "data": "userName" },
+                    { "data": "personalName" },
+                    { "data": "email" },
+                    {
+                        "data": "id", "render": function (data, type, full, meta) {
+                            return `<button type='button' class='btn btn-primary btn-sm' style='margin-left:5px' onclick='DeleteAdmin("${data}")'><i class='fa fa-trash'></i> Удалить</button>`;
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "150px"
+                    }
+
+                ]
+            });
+
+        });
+        $(document).ready(function () {
+
+            $("#users").DataTable({
+                "info": false,
+                scrollY: '200px',
+                "ajax": {
+                    "url": "/Admins/GetUsers",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+
+                "columns": [
+                    { "data": "userName" },
+                    { "data": "personalName" },
+                    { "data": "email" },
+                    { 
+                        "data": "id", "render": function (data, type, full, meta) {
+                return `<button type='button' class='btn btn-primary btn-sm' style='margin-left:5px' onclick='AddAdmin("${data}")'><i class='fa fa-trash'></i> Сделать админом</button>`;
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "150px"
+                    }
+
+                ]
+            });
+
+        });
+        function DeleteAdmin(adminId) {
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteAdmin", "Admins")?adminId=' + adminId,
+                success: function (data) {
+                    if (!data.success) {
+                        alert(data.message)
+                    }
+                    else { $('#admins').DataTable().ajax.reload()
+                        $('#users').DataTable().ajax.reload()
+                    }
+
+                }
+            });
+        }
+        function AddAdmin(userId) {
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddAdmin", "Admins")?userId=' + userId,
+                success: function (data) {
+                    if (!data.success) {
+                        alert(data.message)
+                    }
+                    else { $('#admins').DataTable().ajax.reload()
+                        $('#users').DataTable().ajax.reload()
+                    }
+                }
+            });
+        }        
+
+    </script>
+}

@@ -1,0 +1,85 @@
+﻿<div class="form-horizontal">
+    <table data-paging="false" data-searching="false" data-ordering="false" id="events" class="table table-bordered  table-hover">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Дата</th>
+                <th>Участников</th>
+                <th>Макc. участников</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+@section scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css">
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#events").DataTable({
+                "info": false,
+                scrollY: '400px',
+                "ajax": {
+                    "url": "/Events/GetEvents",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+
+                "columns": [
+                    { "data": "eventName" },
+                    { "data": "eventDate" },                    
+                    { "data": "numberOfUsers" },
+                    { "data": "maxNumberOfUsers" },
+                    {
+                        "data": "eventId", "render": function (data, type, full, meta) {
+                            return "<button type='button' class='btn btn-primary btn-sm' style='margin-left:5px' onclick=\"OpenEvent('@Url.Action("OpenEvent", "Events")?id=' +" + data + ")\"><i class='fa fa-trash'></i> Открыть</button>";
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "150px"
+                    }
+
+                ]
+            });
+
+        });
+
+        var Popup
+
+        function OpenEvent(url) {
+            var formDiv = $(document.createElement('div'));
+            $.get(url)
+                .done(function (response) {
+                    if (response == null) {
+                        alert("Ничего не выбрано!");
+                    }
+                    else {
+                        formDiv.css("background", "linear-gradient(115deg, #56d8e4 10%, #9f01ea 90%)").html(response);
+                        Popup = formDiv.dialog({
+                            autoOpen: true,
+                            resizable: false,
+                            height: 595,
+                            width: 525,
+                            classes: {
+                                "ui-dialog-titlebar": "white"
+                            },
+                            close: function () {
+                                Popup.dialog('destroy').remove();
+                            }
+
+                        });
+                    }
+                });
+        }           
+
+    </script>
+}
